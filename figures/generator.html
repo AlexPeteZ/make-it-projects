@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Генератор фигурок</title>
+<style>
+  body { font: 1rem system-ui; background: #f5f2ff; color: #242039; margin: 2rem auto; padding: 0 1rem; max-width: 38rem; }
+  form, section { margin-block: 1.5rem; }
+  label, textarea, input, img { display: block; margin-block: .75rem; }
+  textarea { box-sizing: border-box; width: 100%; min-height: 7rem; }
+  button { padding: .6rem 1rem; }
+  img { max-width: 100%; max-height: 30rem; }
+  [hidden] { display: none; }
+</style>
+<main>
+  <h1>Генератор фигурок</h1>
+  <form id="preview-form">
+    <label for="description">Как выглядит фигурка?</label>
+    <textarea id="description" required maxlength="2000" placeholder="Например, лисёнок в космическом шлеме"></textarea>
+    <button>Создать картинку</button>
+  </form>
+  <p id="preview-status" role="status"></p>
+  <img id="preview" alt="Картинка фигурки" hidden>
+  <form id="model-form" hidden>
+    <label for="owner">Код владельца для генерации STL</label>
+    <input id="owner" type="password" autocomplete="off" required>
+    <button>Создать 3D-модель</button>
+  </form>
+  <p id="model-status" role="status"></p>
+  <section id="model-result" aria-label="Готовая модель"></section>
+</main>
+<script src="ai.js"></script>
+<script src="generator.js"></script>
+</html>
