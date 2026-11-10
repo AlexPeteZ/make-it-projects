@@ -1,0 +1,41 @@
+(()=>{
+let current=150000;const max=1500000,step=50000;
+const money=n=>new Intl.NumberFormat('ru-RU').format(n)+' ₸';
+const section=document.createElement('section');section.className='progress-section';section.innerHTML='<div class="progress-heading"><div><div class="eyebrow">ОТ ИДЕИ К МЕЧТЕ</div><h2>Мой прогресс</h2></div><div class="saved">Сейчас у меня <strong>150 000 ₸</strong></div></div><div class="progress-meta"><span>0 ₸</span><span>Цель · 1 500 000 ₸</span></div><div class="overall" role="progressbar" aria-label="Мой прогресс накоплений" aria-valuemin="0" aria-valuemax="1500000" aria-valuenow="150000"><div></div></div><p class="progress-help">Нажми на точку — посмотри покупки для этой суммы. Ленту можно прокручивать ↔</p><div class="milestone-scroll"><div class="milestones" role="group" aria-label="Суммы с шагом 50 тысяч тенге"></div></div><div class="ideas-heading"><h3 id="ideas-title"></h3><span id="distance"></span></div><div class="ideas" aria-live="polite"></div><p class="ideas-note">Это идеи для подбора в пределах выбранной суммы, а не проверенные предложения магазинов. Комплектацию и итоговую цену нужно сверить. Каждая идея — отдельный вариант, не все четыре покупки вместе.</p>';
+document.querySelector('main .foot').after(section);
+const overallBar=section.querySelector('.overall');
+let paidPointIndex=0;
+window.WISHES.forEach((wish,i)=>{const amountMatch=wish.price.replace(/\s/g,'').match(/\d+/);const amount=amountMatch?Number(amountMatch[0]):0;if(amount<=0)return;const point=document.createElement('button');point.type='button';point.className='wish-point';const markerIndex=paidPointIndex++;point.style.setProperty('--marker-offset',(amount===max?0:(markerIndex%2===0?-1:1)*(12+Math.floor(markerIndex/2)*18))+'px');point.style.left=(Math.min(amount/max,1)*100)+'%';point.setAttribute('aria-label',wish.name+' — '+wish.price);const tooltip=document.createElement('span');tooltip.className='wish-tooltip';tooltip.textContent=(wish.price.includes('≈')?'≈ ':'')+money(amount);if(amount/max>.8)point.classList.add('near-end');point.append(tooltip);point.onclick=()=>openWish(wish,i);overallBar.append(point)});
+let selectedAmount=current;
+const refresh=document.createElement('button');refresh.type='button';refresh.className='refresh-recs';refresh.textContent='Обновить рекомендации';refresh.onclick=()=>select(selectedAmount,true);section.querySelector('.ideas-heading').after(refresh);
+const track=section.querySelector('.milestones'),list=section.querySelector('.ideas');
+for(let amount=0;amount<=max;amount+=step){const b=document.createElement('button');b.className='milestone'+(amount<=current?' reached':'')+(amount===current?' current':'');b.dataset.amount=amount;b.setAttribute('aria-pressed','false');b.innerHTML='<span class="dot"></span><span>'+money(amount)+'</span>';b.onclick=()=>select(amount);track.append(b)}
+function select(amount,renew=false){
+ selectedAmount=amount;
+ const previous=[...list.querySelectorAll('h4')].map(h=>h.textContent);
+ track.querySelectorAll('.milestone').forEach(b=>{const on=Number(b.dataset.amount)===amount;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on))});
+ const eligible=window.affordableRecommendations(amount).sort((a,b)=>b.price-a.price);
+ section.querySelector('#ideas-title').textContent='Идеи до '+money(amount);
+ section.querySelector('#distance').textContent=amount>current?'До этой точки ещё '+money(amount-current):amount===current?'Твоя текущая точка':'Эта сумма уже есть';
+ list.replaceChildren();
+ refresh.disabled=eligible.length<=4;
+ section.querySelector('.ideas-note').textContent='У каждой идеи есть примерный порог бюджета по найденным ранее ценам. Это не гарантированная цена и не минимум всего рынка: подходящую модель, наличие и доставку проверь в поиске. Обновление меняет идеи, а не цены.';
+ if(!eligible.length){const empty=document.createElement('p');empty.className='recommendation-empty';const cheapest=Math.min(...window.RECOMMENDATIONS.map(x=>x.price));empty.textContent='Пока не хватает денег на идеи из этой подборки. Первый ориентир — '+money(cheapest)+': осталось накопить '+money(cheapest-amount)+'.';list.append(empty);return}
+ let chosen=eligible;
+ if(renew){chosen=[...eligible];for(let i=chosen.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[chosen[i],chosen[j]]=[chosen[j],chosen[i]]}if(chosen.slice(0,4).every(x=>previous.includes(x.name))){const fresh=chosen.findIndex(x=>!previous.includes(x.name));if(fresh>=0)[chosen[0],chosen[fresh]]=[chosen[fresh],chosen[0]]}}
+ const mixed=[],seenCategories=new Set();for(const item of chosen){if(!seenCategories.has(item.category)){mixed.push(item);seenCategories.add(item.category)}}for(const item of chosen){if(!mixed.includes(item))mixed.push(item)}mixed.slice(0,4).forEach((item,i)=>{const card=document.createElement('article');card.className='idea';const num=document.createElement('span');num.className='idea-number';num.textContent='0'+(i+1)+' · '+item.category;const title=document.createElement('h4');title.textContent=item.name;const price=document.createElement('p');price.textContent='Ориентир: от ≈ '+money(item.price);const balance=document.createElement('p');balance.textContent='На поиск есть '+money(amount);const link=document.createElement('a');link.href='https://www.google.com/search?hl=ru&lr=lang_ru&q='+encodeURIComponent(item.name+' купить Алматы до '+amount+' тенге');link.target='_blank';link.rel='noopener noreferrer';link.textContent='Поискать варианты ↗';card.append(num,title,price,balance,link);if(item.note){const note=document.createElement('p');note.textContent=item.note;card.append(note)}list.append(card)});
+}
+const controls=document.createElement('form');controls.className='money-controls';controls.innerHTML='<button type="button" class="money-minus" aria-label="Уменьшить сумму на 2500 тенге">−</button><label>Моя сумма, ₸<input name="amount" type="number" min="0" max="1500000" step="1" value="150000" inputmode="numeric" required></label><button type="button" class="money-plus" aria-label="Увеличить сумму на 2500 тенге">+</button><button type="submit" class="money-set">Установить</button><span class="money-hint">Шаг кнопок — 2 500 ₸</span>';
+section.querySelector('.progress-heading').after(controls);
+const amountInput=controls.elements.amount;
+const fill=document.createElement('div');fill.className='milestone-fill';track.append(fill);
+const here=document.createElement('div');here.className='money-here';here.innerHTML='<span class="here-dot"></span><small>Ты здесь</small>';track.append(here);
+function updateMoney(amount,follow=true){current=Math.max(0,Math.min(max,Math.round(amount)));amountInput.value=String(current);section.querySelector('.saved strong').textContent=money(current);overallBar.setAttribute('aria-valuenow',String(current));overallBar.querySelector('div').style.width=(current/max*100)+'%';track.querySelectorAll('.milestone').forEach(b=>{const value=Number(b.dataset.amount);b.classList.toggle('reached',value<=current);b.classList.toggle('current',value===current)});const first=track.querySelector('.milestone'),last=track.querySelector('.milestone:last-of-type');const start=first.offsetLeft+first.offsetWidth/2,end=last.offsetLeft+last.offsetWidth/2;const position=start+(end-start)*current/max;fill.style.left=start+'px';fill.style.width=(position-start)+'px';here.style.left=position+'px';here.setAttribute('aria-label','Ты здесь: '+money(current));here.querySelector('small').textContent='Ты здесь · '+money(current);controls.querySelector('.money-minus').disabled=current===0;controls.querySelector('.money-plus').disabled=current===max;select(current);if(follow){const scroller=section.querySelector('.milestone-scroll');scroller.scrollLeft=Math.max(0,position-scroller.clientWidth/2)}}
+controls.onsubmit=event=>{event.preventDefault();if(!controls.reportValidity())return;updateMoney(Number(amountInput.value))};controls.querySelector('.money-minus').onclick=()=>updateMoney(current-2500);controls.querySelector('.money-plus').onclick=()=>updateMoney(current+2500);
+select(current);requestAnimationFrame(()=>updateMoney(current));window.addEventListener('resize',()=>updateMoney(current,false));
+})();
+
+
+
+
+

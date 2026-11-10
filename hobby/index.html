@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Анти-токсичная система</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #070b16;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+
+    .slides {
+      position: fixed;
+      inset: 0;
+      height: 200vh;
+      width: 100%;
+      transition: transform 0.7s ease;
+    }
+
+    .slides.show-details {
+      transform: translateY(-100vh);
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 32px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding-top: 180px;
+    }
+
+    .logo {
+      width: 116px;
+      height: 116px;
+      flex: 0 0 116px;
+      position: relative;
+    }
+
+    .logo-head,
+    .logo-ban {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      line-height: 1;
+    }
+
+    .logo-head {
+      font-size: 64px;
+    }
+
+    .logo-ban {
+      z-index: 1;
+      inset: 6px;
+      border: 7px solid #ef3b3b;
+      border-radius: 50%;
+    }
+
+    .logo-ban::after {
+      content: "";
+      position: absolute;
+      width: 112%;
+      height: 7px;
+      border-radius: 999px;
+      background: #ef3b3b;
+      transform: rotate(-45deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 64px);
+      text-align: center;
+    }
+
+    .description {
+      margin: 28px auto 40px;
+      max-width: 720px;
+      font-size: clamp(20px, 3vw, 32px);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .more {
+      margin: auto auto 0;
+      border: 0;
+      border-radius: 18px;
+      padding: 11px 18px;
+      background: #ffffff;
+      color: #000000;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .more.is-hidden {
+      opacity: 0;
+      transform: translateY(-14px);
+      pointer-events: none;
+    }
+
+    .arrow {
+      margin-left: 10px;
+      font-size: 22px;
+    }
+
+    .details {
+      min-height: 100vh;
+      position: relative;
+      background: #070b16;
+      padding: 32px;
+    }
+
+    .details-content {
+      width: min(1000px, calc(100% - 48px));
+      margin: 110px auto 0;
+      display: grid;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 24px;
+      height: calc(100vh - 142px);
+      padding-bottom: 24px;
+    }
+
+    .detail-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 36px;
+      align-items: center;
+      min-height: 0;
+    }
+
+    .description-box {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      border: 2px solid #ffffff;
+      border-radius: 18px;
+      padding: 24px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .image-space {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      border: 2px dashed #596171;
+      border-radius: 18px;
+      color: #9aa3b5;
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .back {
+      position: absolute;
+      top: 32px;
+      left: 50%;
+      margin: 0;
+      opacity: 0;
+      transform: translate(-50%, 14px);
+      pointer-events: none;
+    }
+
+    .back.is-visible {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+
+    @media (max-width: 600px) {
+      .page {
+        padding: 20px;
+      }
+
+      .logo {
+        width: 78px;
+        height: 78px;
+        flex-basis: 78px;
+        font-size: 12px;
+      }
+
+      .logo-head {
+        font-size: 42px;
+      }
+
+      .logo-ban {
+        inset: 4px;
+        border-width: 5px;
+      }
+
+      .logo-ban::after {
+        height: 5px;
+      }
+
+      .top {
+        padding-top: 130px;
+      }
+
+      h1 {
+        margin: 0;
+      }
+
+      .details-content {
+        width: 100%;
+        margin-top: 90px;
+        height: calc(100vh - 110px);
+        padding-bottom: 20px;
+      }
+
+      .detail-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .description-box,
+      .image-space {
+        min-height: 0;
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="slides" id="slides">
+    <main class="page">
+      <header class="top">
+        <div class="logo" role="img" aria-label="Говорящая голова внутри знака запрета">
+          <span class="logo-head" aria-hidden="true">🗣️</span>
+          <span class="logo-ban" aria-hidden="true"></span>
+        </div>
+        <h1>Анти-токсичная система</h1>
+      </header>
+
+      <p class="description">Бот для Minecraft-сервера помогает бороться с токсичными игроками и другими проблемами: выходом из лобби перед началом раунда и stream sniping.</p>
+
+      <button class="more" id="open-details" type="button">
+        Подробнее <span class="arrow" aria-hidden="true">↓</span>
+      </button>
+    </main>
+
+    <section class="details" id="details" aria-label="Подробности">
+      <button class="more back" id="close-details" type="button">
+        Назад <span class="arrow" aria-hidden="true">↑</span>
+      </button>
+
+      <div class="details-content">
+        <div class="detail-row">
+          <div class="description-box">Описание 1</div>
+          <div class="image-space">Место для картинки</div>
+        </div>
+
+        <div class="detail-row">
+          <div class="description-box">Описание 2</div>
+          <div class="image-space">Место для картинки</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const openButton = document.querySelector('#open-details');
+    const closeButton = document.querySelector('#close-details');
+    const slides = document.querySelector('#slides');
+
+    openButton.addEventListener('click', () => {
+      openButton.classList.add('is-hidden');
+      window.setTimeout(() => slides.classList.add('show-details'), 180);
+      window.setTimeout(() => closeButton.classList.add('is-visible'), 650);
+    });
+
+    closeButton.addEventListener('click', () => {
+      closeButton.classList.remove('is-visible');
+      window.setTimeout(() => slides.classList.remove('show-details'), 180);
+      window.setTimeout(() => openButton.classList.remove('is-hidden'), 650);
+    });
+  </script>
+</body>
+</html>
